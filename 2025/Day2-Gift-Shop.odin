@@ -6,10 +6,11 @@ import "core:strings"
 import "core:strconv"
 import "core:unicode/utf8"
 import "core:mem"
+import "core:testing"
 
 
 //TODO: Find memory leaks.
-main :: proc(){
+day_2_gift_shop :: proc(){
 	tracking_allocator: mem.Tracking_Allocator
     mem.tracking_allocator_init(&tracking_allocator, context.allocator)
     context.allocator = mem.tracking_allocator(&tracking_allocator)
@@ -24,7 +25,6 @@ main :: proc(){
 	defer delete(data, context.allocator)
 
 
-	// input := "11-22,95-115,998-1012,1188511880-1188511890,222220-222224, 1698522-1698528,446443-446449,38593856-38593862,565653-565659, 824824821-824824827,2121212118-2121212124Z"
 	input := string(data)
 
 	ranges := strings.split(input,",")
@@ -129,4 +129,36 @@ find_invalids :: proc(start: int, end: int) -> [dynamic]int{
 	}
 
 	return invalids
+}
+
+@(test)
+test_day_2_gift_shop :: proc(t: ^testing.T){
+	input := "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124"
+	ranges := strings.split(input,",")
+	defer delete(ranges)
+
+	total := 0
+	for range in ranges{
+		values := strings.split(range,"-")
+		defer delete(values)
+
+		start, ok_1 := strconv.parse_int(values[0])
+		if !ok_1{
+			testing.expect(t,false, string(values[0]))
+			return
+		}
+		end, ok_2 := strconv.parse_int(values[1])
+		if !ok_2{
+			testing.expect(t,false, string(values[1]))
+			return
+		}
+
+		invalids := find_invalids(start,end)
+		defer delete(invalids)
+		for id in invalids{
+			total += id
+		}
+	}
+
+	testing.expect(t, total == 4174379265, "-- Day 2: FAILED ---")
 }

@@ -5,6 +5,7 @@ import "core:strings"
 import "core:fmt"
 import "core:strconv"
 import "core:math"
+import "core:testing"
 
 MoveDial :: proc(dial: int, turn: int) -> (new: int, touched_zero: int) {
 	touched_zero = 0
@@ -22,11 +23,10 @@ MoveDial :: proc(dial: int, turn: int) -> (new: int, touched_zero: int) {
 
 	//TODO: Understand why df this was the issue.
 	new = (((dial + turn) % 100) + 100) % 100
-	fmt.println(dial, turn, new)
 	return
 }
 
-main :: proc() {
+day_1_secret_entrance :: proc() {
 	data, ok := os.read_entire_file("./Day1-Input.txt", context.allocator)
 	if !ok{
 		fmt.println("Unable to read file.")
@@ -35,9 +35,6 @@ main :: proc() {
 
 	defer delete(data, context.allocator)
 
-	// data : [dynamic]string
-	// append(&data, "L68","L30","R48","L5","R60","L55","L1","L99","R14","L82","R1000","L1000")
-	// expected := 26
 	expected := 6770
 
 	dial := 50
@@ -63,8 +60,36 @@ main :: proc() {
 
 
 	if (result == expected){
-		fmt.println("━ PASSED ━━━ Result: ", result)
+		fmt.println("━━ PASSED ━━━ Result: ", result)
 	}else{
-		fmt.println("━ ERROR ━━━ Expected: ", expected, "| Actual: ", result)
+		fmt.println("━━ ERROR ━━━ Expected: ", expected, "| Actual: ", result)
 	}
+}
+
+@(test)
+test_day_1_secret_entrance :: proc(t: ^testing.T){
+	dial := 50
+	result := 0
+	touched_zero:= 0
+
+	data : [dynamic]string
+	append(&data, "L68","L30","R48","L5","R60","L55","L1","L99","R14","L82","R1000","L1000")
+
+	for rotation in data{
+		theta, ok := strconv.parse_int(strings.cut(rotation,1,0))
+		if !ok {
+			break
+		}
+
+		if (strings.contains(rotation,"R")){
+			dial, touched_zero = MoveDial(dial, theta)
+		}else{
+			dial, touched_zero = MoveDial(dial, -theta)
+		}
+
+		result += touched_zero
+	}
+
+
+	testing.expect(t, result == 26, "-- Day 1 : FAILED ---")
 }
