@@ -4,8 +4,7 @@ main :: proc(){
 	when true{
 		// day_1_secret_entrance()
 		// day_2_gift_shop()
-
-		day_3_lobby()
-		// test_day_3_lobby()
+		// day_3_lobby()
+		day_4_printing_department()
 	}
 }
